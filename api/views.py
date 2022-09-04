@@ -80,6 +80,7 @@ class OrderUpdateView(RetrieveUpdateDestroyAPIView):
 
     
 class PayCallback(GenericAPIView):
+    serializer_class=OrderSerializer
     def get(self, request):
         query = request.query_params.get('trxref')
         url = f'https://api.paystack.co/transaction/verify/{query}'

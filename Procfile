@@ -1,2 +1,2 @@
 realease: python manage.py migrate
-web gunicorn boisteus.wsgi --log-file
+web gunicorn boisterus.wsgi --log-file
