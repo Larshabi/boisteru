@@ -87,6 +87,4 @@ class PayCallback(GenericAPIView):
         headers = {'Authorization': f'Bearer {settings.PAYSTACK_PRIVATE_KEY}'}
         res = requests.get(url, headers=headers)
         result=res.json()
-        if result["message"] == 'Verification successful':
-            return Response({'message':'Payment Verified'}, status=status.HTTP_200_OK)
         return Response({'message': result["message"]}, status=status.HTTP_400_BAD_REQUEST)

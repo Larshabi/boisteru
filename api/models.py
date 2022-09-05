@@ -15,6 +15,7 @@ class Category(models.Model):
     
 class Product(models.Model):
     name =models.CharField(max_length=30, unique=True)
+    description=models.CharField(max_length=255, blank=True)
     slug = models.SlugField(null=True, blank=True)
     price = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category')
@@ -23,7 +24,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     quantity = models.IntegerField(default=0)
-    featured = models.BooleanField(default=False)
     
     def save(self, *args, **kwargs):
         original_slug = slugify(self.name)
@@ -36,15 +36,6 @@ class Product(models.Model):
             count += 1
             queryset = Product.objects.all().filter(slug__iexact=slug).count()
         self.slug = slug
-        if self.featured:
-            try:
-                temp = Product.objects.get(featured=True)
-                if self != temp:
-                    temp.featured = False
-                    temp.save()
-            except Product.DoesNotExist:
-                pass
-            
         super(Product, self).save(*args, **kwargs)
         
     def __str__(self):
@@ -53,19 +44,17 @@ class Product(models.Model):
     def get_absolute_url(self):
         return f'/{self.category}/{self.slug}/'
     
-    def get_image(self):
-        if self.image:
-            return 'http://127.0.0.1:8000' + self.image.url
-        return ''
     
     def get_thumbnail(self):
         if self.thumbnail:
-            return 'http://127.0.0.1:8000' + self.thumbnail.url
+            return self.thumbnail.url
         else:
             if self.image:
+                print(self.image)
                 self.thumbnail = self.make_thumbnail(self.image)
+                print(self.thumbnail.url)
                 self.save()
-                return 'http://127.0.0.1:8000' + self.thumbnail.url
+                return self.thumbnail.url
             else:
                 return ''
             

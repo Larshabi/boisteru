@@ -40,7 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'place',
             'phone',
             'items',
-            'total_amount'
+            'total_amount',
         ]
         read_only_fields =['orderId']
     def create(self, validated_data):
