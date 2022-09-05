@@ -87,4 +87,13 @@ class PayCallback(GenericAPIView):
         headers = {'Authorization': f'Bearer {settings.PAYSTACK_PRIVATE_KEY}'}
         res = requests.get(url, headers=headers)
         result=res.json()
-        return Response({'message': result["message"]}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': result["message"]}, status=status.HTTP_200_OK)
+    
+class PaymentVerify(GenericAPIView):
+    def get(self, reuest, tref):
+        url = f'https://api.paystack.co/transaction/verify/{tref}'
+        headers = {'Authorization': f'Bearer {settings.PAYSTACK_PRIVATE_KEY}'}
+        res = requests.get(url, headers=headers)
+        result=res.json()
+        return Response({'message': result["message"]}, status=status.HTTP_200_OK)
+        
