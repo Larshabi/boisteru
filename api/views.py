@@ -15,9 +15,9 @@ class ProductListView(GenericAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     queryset=Product.objects.all()
+    lookup_field = 'name'
     def get(self, request, name):
-        category = Category.objects.get(name=name)
-        products = Product.objects.filter(category=category, quantity__gt=0).order_by('-created_at')
+        products = Product.objects.filter(category__name=name, quantity__gt=0).order_by('-created_at')
         serializer =self.serializer_class(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     filterset_fields = [
