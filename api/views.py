@@ -103,6 +103,7 @@ class PayCallback(GenericAPIView):
         return Response({'message': result["message"]}, status=status.HTTP_200_OK)
     
 class PaymentVerify(GenericAPIView):
+    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     def get(self, reuest, tref):
         url = f'https://api.paystack.co/transaction/verify/{tref}'
