@@ -3,6 +3,8 @@ from django.template.defaultfilters import slugify
 from io import BytesIO
 from PIL import Image
 from django.core.files import File
+from django.contrib.auth.models import User
+
 class Category(models.Model):
     class Meta:
         verbose_name='Category'
@@ -20,23 +22,11 @@ class Product(models.Model):
     price = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category')
     image= models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='photos/%Y/%m/%d', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     quantity = models.IntegerField(default=0)
     
-    def save(self, *args, **kwargs):
-        original_slug = slugify(self.name)
-        queryset = Product.objects.all().filter(slug__iexact=original_slug).count()
-        count = 1
-        slug=original_slug
-        
-        while(queryset):
-            slug=original_slug+ '-' + str(count)
-            count += 1
-            queryset = Product.objects.all().filter(slug__iexact=slug).count()
-        self.slug = slug
-        super(Product, self).save(*args, **kwargs)
+    
         
     def __str__(self):
         return self.name  
@@ -45,34 +35,10 @@ class Product(models.Model):
         return f'/{self.category}/{self.slug}/'
     
     
-    def get_thumbnail(self):
-        if self.thumbnail:
-            return self.thumbnail.url
-        else:
-            if self.image:
-                print(self.image)
-                self.thumbnail = self.make_thumbnail(self.image)
-                print(self.thumbnail.url)
-                self.save()
-                return self.thumbnail.url
-            else:
-                return ''
-            
-    def make_thumbnail(self, image, size=(300, 200)):
-        img = Image.open(image)
-        img.thumbnail(size)
-        thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=85)
-        thumbnail = File(thumb_io,name=image.name)
-        return thumbnail
-    
 class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
     orderId = models.CharField(max_length=10)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email= models.EmailField(max_length=255)
     address= models.CharField(max_length=255)
-    place = models.CharField(max_length=255)
     phone = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     total_amount=models.IntegerField(blank=True, null=True)
@@ -85,9 +51,20 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product,  on_delete=models.CASCADE)
     price = models.IntegerField()
     quantity = models.IntegerField(default=1)
+    size = models.CharField(max_length=20, blank=True, null=True)
+    
     
     def __str__(self):
         return f'{self.id}'
+    
+class Sizes(models.Model):
+    class Meta:
+        verbose_name_plural='Sizes'
+    product = models.ForeignKey(Product, related_name='size', on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
+    quantity = models.IntegerField(default=0)
+    def __str__(self):
+        return f'{self.name}'
     
 class Transaction(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
